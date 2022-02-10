@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Amendment_Post" format="json">
+      <types:shape format="weave" example="examples/InternalAmendment.json"><![CDATA[%dw 2.0
+
+type Amendment_Post = {|
+  AmendmentID: String, 
+  ResearchIndNumber: Number {"typeId": "int"}, 
+  ApplicationNum: String, 
+  SubmitterFirstName: String, 
+  SubmitterLastName: String, 
+  SubmitterEmail: String, 
+  SubmitterOffice: String, 
+  AssociateFdaEmployee: {|
+    AssociateFdaEmployee1: {|
+      EmployeeFirstName: String, 
+      EmployeeLastName: String, 
+      EmployeeEmail: String, 
+      EmployeeID: Number {"typeId": "int"}
+    |}, 
+    AssociateFdaEmployee2: {|
+      EmployeeFirstName: String, 
+      EmployeeLastName: String, 
+      EmployeeEmail: String, 
+      EmployeeID: Number {"typeId": "int"}
+    |}
+  |}, 
+  AssociateExistingApplication: {|
+    AssociateExistingApplication1: {|
+      ApplicationType: String, 
+      ApplicationID: String
+    |}, 
+    AssociateExistingApplication2: {|
+      ApplicationType: String, 
+      ApplicationID: String
+    |}
+  |}
+|} {"example": "{\\\"AmendmentID\\\":\\\"AID-000123\\\",\\\"ResearchIndNumber\\\":33233,\\\"ApplicationNum\\\":\\\"RIND-1234\\\",\\\"SubmitterFirstName\\\":\\\"John\\\",\\\"SubmitterLastName\\\":\\\"Appleseed\\\",\\\"SubmitterEmail\\\":\\\"John.Appleseed@fda.hhs.gov\\\",\\\"SubmitterOffice\\\":\\\"OND\\\",\\\"AssociateFdaEmployee\\\":{\\\"AssociateFdaEmployee1\\\":{\\\"EmployeeFirstName\\\":\\\"Tom\\\",\\\"EmployeeLastName\\\":\\\"Selleck\\\",\\\"EmployeeEmail\\\":\\\"Tom.Selleck@fda.hhs.gov\\\",\\\"EmployeeID\\\":111222333},\\\"AssociateFdaEmployee2\\\":{\\\"EmployeeFirstName\\\":\\\"Janice\\\",\\\"EmployeeLastName\\\":\\\"Appleseed\\\",\\\"EmployeeEmail\\\":\\\"Janice.Appleseed@fda.hhs.gov\\\",\\\"EmployeeID\\\":333222111}},\\\"AssociateExistingApplication\\\":{\\\"AssociateExistingApplication1\\\":{\\\"ApplicationType\\\":\\\"Commercial IND\\\",\\\"ApplicationID\\\":\\\"CIND-1234\\\"},\\\"AssociateExistingApplication2\\\":{\\\"ApplicationType\\\":\\\"Commercial IND\\\",\\\"ApplicationID\\\":\\\"CIND-4321\\\"}}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="Assignment_Type" format="json">
+      <types:shape format="weave" example="examples/CaseAssignment-1.json"><![CDATA[%dw 2.0
+
+type Assignment_Type = {|
+  CaseAssignment: {|
+    AssignmentLabel: String, 
+    SubmissionID: String, 
+    FdaEmployeeFirstName: String, 
+    FdaEmployeeLastName: String, 
+    FdaEmployeeEmail: String, 
+    FdaEmployeeOffice: String
+  |}
+|} {"example": "{\\\"CaseAssignment\\\":{\\\"AssignmentLabel\\\":\\\"Research IND Assignment\\\",\\\"SubmissionID\\\":\\\"RIND-1234\\\",\\\"FdaEmployeeFirstName\\\":\\\"John\\\",\\\"FdaEmployeeLastName\\\":\\\"Appleseed\\\",\\\"FdaEmployeeEmail\\\":\\\"John.Appleseed@fda.hhs.gov\\\",\\\"FdaEmployeeOffice\\\":\\\"OND\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="Assignment_Array" format="json">
+      <types:shape format="weave" example="examples/CaseAssignment_Array.json"><![CDATA[%dw 2.0
+
+type Assignment_Array = Array<{|  AssignmentID: String,   SubmissionID: String,   FdaEmployeeFirstName: String,   FdaEmployeeLastName: String,   FdaEmployeeEmail: String,   FdaEmployeeOffice: String|}> {"example": "[{\\\"AssignmentID\\\":\\\"AID-000123\\\",\\\"SubmissionID\\\":\\\"RIND-1234\\\",\\\"FdaEmployeeFirstName\\\":\\\"John\\\",\\\"FdaEmployeeLastName\\\":\\\"Appleseed\\\",\\\"FdaEmployeeEmail\\\":\\\"John.Appleseed@fda.hhs.gov\\\",\\\"FdaEmployeeOffice\\\":\\\"OND\\\"},{\\\"AssignmentID\\\":\\\"AID-000123\\\",\\\"SubmissionID\\\":\\\"RIND-1234\\\",\\\"FdaEmployeeFirstName\\\":\\\"John\\\",\\\"FdaEmployeeLastName\\\":\\\"Appleseed\\\",\\\"FdaEmployeeEmail\\\":\\\"John.Appleseed@fda.hhs.gov\\\",\\\"FdaEmployeeOffice\\\":\\\"OND\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#d091e4a1-b61c-4841-948a-c3d01e4aafd1">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Amendment_Post"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#d849a732-beeb-4880-9160-e20a85f70d0c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Amendment_Post"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#839bf572-956c-421c-bcdf-c266d1ef07d7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Assignment_Array"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#178bed2f-7830-4aec-b70a-2f0828eed13b">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Assignment_Array"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

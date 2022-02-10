@@ -1,0 +1,18 @@
+[
+{
+  "AssignmentID": "AID-000123",
+  "SubmissionID": "RIND-1234",
+  "FdaEmployeeFirstName": "John",
+  "FdaEmployeeLastName": "Appleseed",
+  "FdaEmployeeEmail": "John.Appleseed@fda.hhs.gov",
+  "FdaEmployeeOffice": "OND"
+  },
+{
+  "AssignmentID": "AID-000123",
+  "SubmissionID": "RIND-1234",
+  "FdaEmployeeFirstName": "John",
+  "FdaEmployeeLastName": "Appleseed",
+  "FdaEmployeeEmail": "John.Appleseed@fda.hhs.gov",
+  "FdaEmployeeOffice": "OND"
+  }
+]
