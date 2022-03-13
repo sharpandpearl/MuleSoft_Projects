@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="12046949-5919-4740-aa83-b5c1d64ca86e" >
+		<db:my-sql-connection host="nephron-data.cjibhcnvimcz.us-east-1.rds.amazonaws.com" port="3306" user="kaw410" password="kyrrais6" database="nephron_data" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="aa5434f9-5db3-4671-9304-578e279a2d3a" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<http:request-config name="NIH_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e728d2ec-ea3d-405c-853c-7122e2ce8ef0" >
+		<http:request-connection protocol="HTTPS" host="api.reporter.nih.gov" port="${https.port}" />
+	</http:request-config>
+	<flow name="consume_nih_apiFlow" doc:id="f049a9b0-1d3b-4ce3-b3fe-17080df4a06f" >
+		<http:listener doc:name="Listener" doc:id="71d7d59e-aa6b-48e5-9bf3-32d4ea16e006" config-ref="HTTP_Listener_config" path="/getNIHData" outputMimeType="application/json" allowedMethods="GET, POST" primaryNodeOnly="true">
+			<ee:repeatable-file-store-stream bufferUnit="BYTE" />
+			<http:error-response statusCode="#[vars.httpStatus default 200]" />
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="4be11972-7ec4-45fb-bbc6-61500d5d85e2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	criteria: {
+		org_states: payload.NIH_Search_Criteria.org_states map ( orgstate , indexOfOrgstate ) -> orgstate,
+		project_start_date: {
+			from_date: payload.NIH_Search_Criteria.project_start_date.from_date,
+			to_date: payload.NIH_Search_Criteria.project_start_date.to_date
+		}
+	},
+	include_fields: ["ApplId","SubprojectId","FiscalYear","Organization", "ProjectNum",
+        "ProjectNumSplit","ContactPiName","AllText","FullStudySection",
+        "ProjectStartDate","ProjectEndDate"],
+	offset: 10,
+	limit: 10,
+	sort_field: "project_start_date",
+	sort_order: "desc"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3bdfc582-a888-4cb3-8b9a-e90d11c8056f" message="#[payload]"/>
+		<http:request method="POST" doc:name="Request" doc:id="f0106dd0-94f9-4fc8-ab8d-1286f5dd772a" config-ref="NIH_HTTP_Request_configuration" path="/v2/projects/search"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9bbafef5-d5b4-4ef6-971f-cac2774c1f2c" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="798c91f2-d65e-4844-a268-17b5f383920f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.results map ( result , indexOfResult ) -> {
+	OrgDunsNumber: result.organization.primary_duns,
+	SubProjectID: 'SubProjectID',
+	FiscalYear: result.fiscal_year as String,
+	OrgState: result.organization.org_state,
+	ProjectName: result.full_study_section.name,
+	ProjectNumber: result.project_num,
+	OrgName: result.organization.org_name,
+	ProjectEndDate: result.project_end_date,
+	OrgCity: result.organization.org_city,
+	OrgUeiNumber: result.organization.primary_uei,
+	ProjectStartDate: result.project_start_date,
+	OrgPrimaryContact: result.contact_pi_name,
+	ApplicationID: result.appl_id as String,
+	OrgDeptType: result.organization.dept_type,
+	OrgCountry: result.organization.org_country
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4ae7a587-a308-4655-8f7b-e69cf3276e52" message="#[payload]"/>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="632c8c23-7991-41e6-b6bf-afa16ee05af8" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO nephron_data.NIH_Data
+	(ApplicationID, SubProjectID, FiscalYear, ProjectNumber, OrgName, OrgCity, OrgCountry, OrgState, OrgDeptType, OrgDunsNumber, OrgUeiNumber, OrgPrimaryContact, ProjectStartDate, ProjectEndDate, ProjectName)
+VALUES 
+	(:ApplicationID, :SubProjectID, :FiscalYear, :ProjectNumber, :OrgName, :OrgCity, :OrgCountry, :OrgState, :OrgDeptType, :OrgDunsNumber, :OrgUeiNumber, :OrgPrimaryContact, :ProjectStartDate, :ProjectEndDate, :ProjectName);
+]]></db:sql>
+		</db:bulk-insert>
+	</flow>
+</mule>

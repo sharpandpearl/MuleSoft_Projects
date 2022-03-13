@@ -1,0 +1,16 @@
+{
+    "criteria": {
+		"org_states": ["AL","MI"],
+
+		"project_start_date": {"from_date": "2022-02-01","to_date": "2022-02-14"}
+    },
+    "include_fields": [
+        "ApplId","SubprojectId","FiscalYear","Organization", "ProjectNum",
+        "ProjectNumSplit","ContactPiName","AllText","FullStudySection",
+        "ProjectStartDate","ProjectEndDate"    
+    ],
+    "offset": 10,
+    "limit": 10,
+    "sort_field": "project_start_date",
+    "sort_order": "desc"
+}

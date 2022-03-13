@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalogs xmlns="http://www.mulesoft.org/schema/mule/types" >
+
+    
+        
+                    <catalog name="get-pending-collaborations-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-pending-collaborations-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="create-collaboration-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-collaboration-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-collaboration-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-collaboration-response-data-schema.json" />
+            </catalog>
+        
+        
+    
+        
+                    <catalog name="get-collaboration-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-collaboration-response-data-schema.json" />
+            </catalog>
+        
+                                                                    
+    
+                    <catalog name="update-collaboration-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-collaboration-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-collaboration-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-collaboration-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+        
+                            
+    
+                    <catalog name="create-comment-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-comment-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-comment-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-comment-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-comment-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-comment-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-comment-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-comment-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-comment-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-comment-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                            
+    
+        
+                    <catalog name="get-file-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-file-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-file-info-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-file-info-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-file-info-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-file-info-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                                                
+    
+                    <catalog name="restore-trashed-file-request-type" format="application/json">
+                <schema format="application/json+schema" location="./restore-trashed-file-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="restore-trashed-file-response-type" format="application/json">
+                <schema format="application/json+schema" location="./restore-trashed-file-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-file-comments-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-file-comments-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                                                                                        
+    
+                    <catalog name="copy-file-request-type" format="application/json">
+                <schema format="application/json+schema" location="./copy-file-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="copy-file-response-type" format="application/json">
+                <schema format="application/json+schema" location="./copy-file-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-file-tasks-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-file-tasks-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+                    <catalog name="get-file-thumbnail-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-file-thumbnail-response-data-schema.json" />
+            </catalog>
+        
+                                                                                                                                
+    
+        
+                    <catalog name="get-trashed-file-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-trashed-file-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+        
+                            
+    
+        
+                    <catalog name="get-file-versions-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-file-versions-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="promote-file-version-request-type" format="application/json">
+                <schema format="application/json+schema" location="./promote-file-version-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="promote-file-version-response-type" format="application/json">
+                <schema format="application/json+schema" location="./promote-file-version-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+        
+                                                                    
+    
+                    <catalog name="create-folder-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-folder-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-folder-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-folder-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-folder-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-folder-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-folder-response-data-schema.json" />
+            </catalog>
+        
+                                                                    
+    
+        
+        
+                                                                    
+    
+                    <catalog name="restore-trashed-folder-request-type" format="application/json">
+                <schema format="application/json+schema" location="./restore-trashed-folder-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="restore-trashed-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./restore-trashed-folder-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+                    <catalog name="get-folder-collaborations-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-folder-collaborations-response-data-schema.json" />
+            </catalog>
+        
+                                                                                        
+    
+                    <catalog name="copy-folder-request-type" format="application/json">
+                <schema format="application/json+schema" location="./copy-folder-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="copy-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./copy-folder-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+                    <catalog name="get-folder-items-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-folder-items-response-data-schema.json" />
+            </catalog>
+        
+                                                                                        
+    
+        
+                    <catalog name="get-trashed-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-trashed-folder-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                            
+    
+        
+                    <catalog name="get-trashed-items-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-trashed-items-response-data-schema.json" />
+            </catalog>
+        
+                                                                    
+    
+                    <catalog name="create-group-membership-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-group-membership-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-group-membership-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-group-membership-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-group-membership-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-group-membership-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-group-membership-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-group-membership-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-group-membership-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-group-membership-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                            
+    
+                    <catalog name="create-group-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-group-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-group-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-group-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-enterprise-groups-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-enterprise-groups-response-data-schema.json" />
+            </catalog>
+        
+                                                                    
+    
+        
+                    <catalog name="get-group-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-group-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                            
+    
+        
+                    <catalog name="get-group-memberships-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-group-memberships-response-data-schema.json" />
+            </catalog>
+        
+                                                                                        
+    
+        
+                    <catalog name="search-response-type" format="application/json">
+                <schema format="application/json+schema" location="./search-response-data-schema.json" />
+            </catalog>
+        
+                                                                                                                                                                                                                                                                                                
+    
+                    <catalog name="create-task-assignment-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-task-assignment-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-task-assignment-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-task-assignment-response-data-schema.json" />
+            </catalog>
+        
+        
+    
+        
+                    <catalog name="get-task-assignment-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-task-assignment-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-task-assignment-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-task-assignment-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-task-assignment-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-task-assignment-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+        
+                            
+    
+                    <catalog name="create-task-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-task-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-task-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-task-response-data-schema.json" />
+            </catalog>
+        
+        
+    
+        
+                    <catalog name="get-task-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-task-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-task-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-task-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-task-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-task-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                            
+    
+        
+                    <catalog name="get-task-assignments-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-task-assignments-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="create-user-request-type" format="application/json">
+                <schema format="application/json+schema" location="./create-user-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="create-user-response-type" format="application/json">
+                <schema format="application/json+schema" location="./create-user-response-data-schema.json" />
+            </catalog>
+        
+                            
+    
+        
+                    <catalog name="get-enterprise-users-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-enterprise-users-response-data-schema.json" />
+            </catalog>
+        
+                                                                                                            
+    
+        
+                    <catalog name="get-user-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-user-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+                    <catalog name="update-user-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-user-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-user-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-user-response-data-schema.json" />
+            </catalog>
+        
+                                                
+    
+        
+        
+                                                                    
+    
+        
+                    <catalog name="get-user-group-membership-response-type" format="application/json">
+                <schema format="application/json+schema" location="./get-user-group-membership-response-data-schema.json" />
+            </catalog>
+        
+                                                                                        
+    
+                    <catalog name="update-user-folder-request-type" format="application/json">
+                <schema format="application/json+schema" location="./update-user-folder-request-data-schema.json" />
+            </catalog>
+        
+                    <catalog name="update-user-folder-response-type" format="application/json">
+                <schema format="application/json+schema" location="./update-user-folder-response-data-schema.json" />
+            </catalog>
+        
+                                                                                        
+    
+</catalogs>

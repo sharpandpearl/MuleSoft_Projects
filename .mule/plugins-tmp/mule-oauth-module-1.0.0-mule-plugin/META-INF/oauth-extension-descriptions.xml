@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension-documentation>
+    <configs>
+        <config name="config">
+            <description><![CDATA[Default configuration]]></description>
+            <parameters/>
+        </config>
+    </configs>
+    <connections/>
+    <extension name="OAuth">
+        <description><![CDATA[An extension to hook oauth2 to http extension connectors.]]></description>
+        <parameters/>
+    </extension>
+    <operations>
+        <operation name="invalidateOauthContext">
+            <description><![CDATA[Clears the oauth context for a token manager and a resource owner id.]]></description>
+            <parameters>
+                <parameter name="tokenManager">
+                    <description><![CDATA[The token manager which holds the credentials to invalidate.]]></description>
+                </parameter>
+                <parameter name="resourceOwnerId">
+                    <description><![CDATA[The resource owner id to invalidate. This attribute is only allowed for authorization code grant type.]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="retrieveAccessToken">
+            <description><![CDATA[Returns the access token of the token manager for the parametrized resource owner ID]]></description>
+            <parameters>
+                <parameter name="tokenManager">
+                    <description><![CDATA[The token manager which holds the access token.]]></description>
+                </parameter>
+                <parameter name="resourceOwnerId">
+                    <description><![CDATA[The resource owner id to invalidate. This attribute is only allowed for authorization code grant type.]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="retrieveCustomTokenResponseParam">
+            <description><![CDATA[Returns the value of the parameter that was extracted during the dance from the token manager for the parametrized resource owner ID]]></description>
+            <parameters>
+                <parameter name="tokenManager">
+                    <description><![CDATA[The token manager which holds the access token.]]></description>
+                </parameter>
+                <parameter name="resourceOwnerId">
+                    <description><![CDATA[The resource owner id to invalidate. This attribute is only allowed for authorization code grant type.]]></description>
+                </parameter>
+                <parameter name="key">
+                    <description><![CDATA[to look for in the elements that has been extracted after the previous OAuth dance.]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="retrieveExpiresIn">
+            <description><![CDATA[Returns the expiration of the oauth context for the parametrized resource owner ID]]></description>
+            <parameters>
+                <parameter name="tokenManager">
+                    <description><![CDATA[The token manager which holds the access token.]]></description>
+                </parameter>
+                <parameter name="resourceOwnerId">
+                    <description><![CDATA[The resource owner id to invalidate. This attribute is only allowed for authorization code grant type.]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="retrieveRefreshToken">
+            <description><![CDATA[Returns the refresh token of the oauth context for the parametrized resource owner ID]]></description>
+            <parameters>
+                <parameter name="tokenManager">
+                    <description><![CDATA[The token manager which holds the refresh token.]]></description>
+                </parameter>
+                <parameter name="resourceOwnerId">
+                    <description><![CDATA[The resource owner id to invalidate. This attribute is only allowed for authorization code grant type.]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="retrieveState">
+            <description><![CDATA[Returns the state of the oauth context for the parametrized resource owner ID]]></description>
+            <parameters>
+                <parameter name="tokenManager">
+                    <description><![CDATA[The token manager which holds the access token.]]></description>
+                </parameter>
+                <parameter name="resourceOwnerId">
+                    <description><![CDATA[The resource owner id to invalidate. This attribute is only allowed for authorization code grant type.]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+    </operations>
+    <sources/>
+</extension-documentation>

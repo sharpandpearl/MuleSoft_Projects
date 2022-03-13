@@ -1,0 +1,6 @@
+{
+    "NIH_Search_Criteria": {
+		"org_states": ["AL","MI"],
+		"project_start_date": {"from_date": "2022-02-01","to_date": "2022-02-14"}
+    }
+}

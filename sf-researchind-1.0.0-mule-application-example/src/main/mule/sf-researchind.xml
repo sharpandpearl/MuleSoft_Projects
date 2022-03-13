@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mule-box-connector="http://www.mulesoft.org/schema/mule/mule-box-connector" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/mule-box-connector http://www.mulesoft.org/schema/mule/mule-box-connector/current/mule-mule-box-connector.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ffdd999d-23cb-4a95-a2c4-1ee8533b997b" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config_MuleSoft_Dev" doc:name="Salesforce Config" doc:id="f6890fe1-a09a-4450-aeb4-0c5cc318192a" >
+		<salesforce:basic-connection username="kofi.white@fda.hhs.gov.fda-cder-2.muledev" password="Kyrrais7" securityToken="JLH19WeEfJV2syinxYe5MpMJO" url="https://fda-cder-2--muledev.my.salesforce.com/services/Soap/u/43.0" />
+	</salesforce:sfdc-config>
+	<mule-box-connector:config name="Mule_box_connector_Config" doc:name="Mule-box-connector Config" doc:id="1591bec4-19b1-4b1b-bddd-46bd97898ca1" property_clientId="c7k0b3tm9kfgh6bme8yzvz2108i39d2k" property_clientSecret="l0IctXpApMIQV0NJCT3uAPJNrKF9JUJk" />
+	<flow name="CreateAssignment" doc:id="839bf572-956c-421c-bcdf-c266d1ef07d7" >
+		<http:listener doc:name="Listener" doc:id="7372fd44-fdbb-4a0d-83a7-85249f8b72f6" config-ref="HTTP_Listener_config" path="/researchind/assignment"/>
+		<ee:transform doc:name="Transform Message" doc:id="178bed2f-7830-4aec-b70a-2f0828eed13b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01.AssignmentID,
+	First_Name__c: payload01.FdaEmployeeFirstName,
+	Last_Name__c: payload01.FdaEmployeeLastName,
+	Related_Case_ID__c: payload01.SubmissionID,
+	Office__c: payload01.FdaEmployeeOffice,
+	Assignee_Email__c: payload01.FdaEmployeeEmail
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d8377561-22e4-4534-858b-8fb58d935d7b" message="#[payload]" />
+		<salesforce:create type="Assignment__c" doc:name="Create" doc:id="3de3f0b5-37b2-43b4-ab4f-1da6bab371bc" config-ref="Salesforce_Config_MuleSoft_Dev"/>
+		<ee:transform doc:name="Transform Message" doc:id="0b97cd4a-b681-4f60-bd83-3bcdddc42c78" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="fcfdb3c8-0f0f-482c-8023-af77b2d715e4" message="#[payload]" />
+	</flow>
+	<flow name="GetAssignment" doc:id="9f90bdff-9efc-4d40-bff9-3450aa8fde48" >
+		<http:listener doc:name="Listener" doc:id="4d0b125a-4180-412a-bee2-c15d74d68d29" config-ref="HTTP_Listener_config" path="/researchind/getAssignment/{ID}" allowedMethods="GET">
+			<ee:repeatable-file-store-stream bufferUnit="BYTE" />
+		</http:listener>
+		<salesforce:query doc:name="Query" doc:id="ec5927f3-c98a-4e8b-b18b-30c396178047" config-ref="Salesforce_Config_MuleSoft_Dev">
+			<salesforce:salesforce-query ><![CDATA[Select name, First_Name__c, Last_Name__c, Related_Case_ID__c, Office__c, Assignee_Email__c, Assignment_ID__c
+from Assignment__c
+WHERE ID = ':ID']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[{'ID': attributes.uriParams.ID}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="1f0367fb-177c-4f3f-8e9c-ffde69c2173e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

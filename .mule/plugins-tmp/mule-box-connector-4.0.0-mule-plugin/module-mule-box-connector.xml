@@ -1,0 +1,1545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="mule-box-connector"
+        prefix="mule-box-connector"
+        namespace="http://www.mulesoft.org/schema/mule/mule-box-connector"
+        doc:description="The Box Content API gives you access to secure content management and content experience features for use in your own app. It strives to be RESTful and is organized around the main resources you&#8217;re familiar with from the Box web interface."
+        xmlns="http://www.mulesoft.org/schema/mule/module"
+        xmlns:mule="http://www.mulesoft.org/schema/mule/core"
+        xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+        xmlns:http="http://www.mulesoft.org/schema/mule/http"
+                    xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.mulesoft.org/schema/mule/module http://www.mulesoft.org/schema/mule/module/current/mule-module.xsd
+           http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+           http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd
+           http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+
+    <property name="property_host" displayName="host" type="string" defaultValue="api.box.com" summary="Host for consuming API"/>
+    <property name="property_port" displayName="port" type="string" defaultValue="443" summary="Port for consuming API"/>
+    <property name="property_basePath" displayName="basePath" type="string" defaultValue="/2.0" summary="Basepath for consuming API"/>
+    <property name="property_protocol" displayName="protocol" type="string" defaultValue="HTTPS" summary="Protocol for consuming API"/>
+
+                        <property name="property_clientId" displayName="clientId" type="string" summary="OAuth2 Client Id"/>
+            <property name="property_clientSecret" displayName="clientSecret" type="string" password="true" summary="OAuth2 Client Secret"/>
+            <property name="property_localCallbackPath" displayName="localCallbackPath" type="string" summary="Path for autogenerating the local callback endpoint" example="/callback" defaultValue="/callback"/>
+            <property name="property_localCallbackConfig" displayName="localCallbackConfig" type="string" summary="HTTP Listener Configuration name for exposing the callback endpoint" example="cloudhub_http" defaultValue="cloudhub_http"/>
+            <property name="property_externalCallbackUrl" displayName="externalCallbackUrl" type="string" summary="URL for redirecting after the OAuth dance login" example="http://my-app.cloudhub.io/callback" defaultValue="http://my-app.cloudhub.io/callback"/>
+            <oauth:token-manager-config name="tokenManagerConfig"/>
+            <property name="property_localAuthorizationUrl" displayName="localAuthorizationUrl" type="string" summary="Local URL for autogenerating the endpoint that starts the OAuth dance" example="http://localhost:8081/authorize" defaultValue="http://localhost:8081/authorize"/>
+            <property name="property_authorizationUrl" displayName="authorizationUrl" type="string" defaultValue="https://account.box.com/api/oauth2/authorize" summary="Authorize URL for consuming API"/>
+                        <property name="property_accessTokenUrl" displayName="accessTokenUrl" type="string" defaultValue="https://api.box.com/oauth2/token" summary="Token URL for consuming API"/>
+            
+    <http:request-config name="mule-box-connector-httpreq-config" basePath="#[vars.property_basePath]">
+        <http:request-connection
+                    host="#[vars.property_host]"
+                    protocol="#[vars.property_protocol]"
+                    port="#[vars.property_port]">
+                                    <http:authentication>
+                    <oauth:authorization-code-grant-type
+                            clientId="#[vars.property_clientId]"
+                            clientSecret="#[vars.property_clientSecret]"
+                                                    localCallbackConfig="#[vars.property_localCallbackConfig]"
+                            localCallbackConfigPath="#[vars.property_localCallbackPath]"
+                            externalCallbackUrl="#[vars.property_externalCallbackUrl]"
+                            localAuthorizationUrl="#[vars.property_localAuthorizationUrl]"
+                            authorizationUrl="#[vars.property_authorizationUrl]"
+                            tokenUrl="#[vars.property_accessTokenUrl]"
+                            tokenManager="tokenManagerConfig">
+                    </oauth:authorization-code-grant-type>
+                </http:authentication>
+                            </http:request-connection>
+    </http:request-config>
+
+
+    <operation name="get-pending-collaborations" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="status"
+                    type="string"
+                                        use="REQUIRED"                    doc:description="Must be &apos;pending&apos;"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/collaborations" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'status': vars['status'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-pending-collaborations-response-type" />
+            </operation>
+    <operation name="create-collaboration" >
+                <parameters>
+                            <parameter name="create-collaboration-request-data" type="create-collaboration-request-type" use="REQUIRED" role="PRIMARY" />
+                                </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/collaborations" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-collaboration-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                        </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-collaboration-response-type" />
+            </operation>
+    <operation name="get-collaboration" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="status"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Can only be pending"/>
+                            <parameter name="collab-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/collaborations/{COLLAB_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'COLLAB_ID': vars['collab-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'status': vars['status'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-collaboration-response-type" />
+            </operation>
+    <operation name="update-collaboration" >
+                <parameters>
+                            <parameter name="update-collaboration-request-data" type="update-collaboration-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="collab-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/collaborations/{COLLAB_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-collaboration-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'COLLAB_ID': vars['collab-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-collaboration-response-type" />
+            </operation>
+    <operation name="delete-collaboration" >
+                <parameters>
+                                        <parameter name="collab-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/collaborations/{COLLAB_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'COLLAB_ID': vars['collab-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="create-comment" >
+                <parameters>
+                            <parameter name="create-comment-request-data" type="create-comment-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/comments" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-comment-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-comment-response-type" />
+            </operation>
+    <operation name="get-comment" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response."/>
+                            <parameter name="comment-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/comments/{COMMENT_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'COMMENT_ID': vars['comment-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-comment-response-type" />
+            </operation>
+    <operation name="update-comment" >
+                <parameters>
+                            <parameter name="update-comment-request-data" type="update-comment-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response."/>
+                            <parameter name="comment-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/comments/{COMMENT_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-comment-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'COMMENT_ID': vars['comment-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-comment-response-type" />
+            </operation>
+    <operation name="delete-comment" >
+                <parameters>
+                                        <parameter name="comment-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/comments/{COMMENT_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'COMMENT_ID': vars['comment-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="get-file" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response."/>
+                            <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-file-response-type" />
+            </operation>
+    <operation name="update-file-info" >
+                <parameters>
+                            <parameter name="update-file-info-request-data" type="update-file-info-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="if-match"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The etag of the file can be included as an &#8216;If-Match&#8217; header to prevent race conditions."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-file-info-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json','If-Match': vars['if-match'] } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-file-info-response-type" />
+            </operation>
+    <operation name="delete-file" >
+                <parameters>
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="if-match"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The etag of the file. This is in the &#8216;etag&#8217; field of the file object."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}" method="DELETE" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'If-Match': vars['if-match'] } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="restore-trashed-file" >
+                <parameters>
+                            <parameter name="restore-trashed-file-request-data" type="restore-trashed-file-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['restore-trashed-file-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="restore-trashed-file-response-type" />
+            </operation>
+    <operation name="get-file-comments" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/comments" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-file-comments-response-type" />
+            </operation>
+    <operation name="get-file-content" >
+                <parameters>
+                                        <parameter name="version"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The ID specific version of this file to download."/>
+                            <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="range"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The range value in bytes. Format should be bytes={start_range}-{end_range}"/>
+                            <parameter name="box-api"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The shared link for this item. Format should be shared_link=SHARED_LINK"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/content" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Range': vars['range'],'BoxApi': vars['box-api'] } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'version': vars['version'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+                    </body>
+            </operation>
+    <operation name="copy-file" >
+                <parameters>
+                            <parameter name="copy-file-request-data" type="copy-file-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/copy" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['copy-file-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="copy-file-response-type" />
+            </operation>
+    <operation name="get-file-tasks" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/tasks" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-file-tasks-response-type" />
+            </operation>
+    <operation name="get-file-thumbnail" >
+                <parameters>
+                                        <parameter name="min-height"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The minimum height of the thumbnail"/>
+                            <parameter name="min-width"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The minimum width of the thumbnail"/>
+                            <parameter name="max-height"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum height of the thumbnail"/>
+                            <parameter name="max-width"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum width of the thumbnail"/>
+                            <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="extension"
+                    type="string"
+                                        use="REQUIRED"                    doc:description="The preview format, e.g. png or jpg"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/thumbnail.{EXTENSION}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'],'EXTENSION': vars['extension'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'min_height': vars['min-height'],'min_width': vars['min-width'],'max_height': vars['max-height'],'max_width': vars['max-width'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-file-thumbnail-response-type" />
+            </operation>
+    <operation name="get-trashed-file" >
+                <parameters>
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/trash" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-trashed-file-response-type" />
+            </operation>
+    <operation name="delete-trashed-file" >
+                <parameters>
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/trash" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="get-file-versions" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/versions" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-file-versions-response-type" />
+            </operation>
+    <operation name="promote-file-version" >
+                <parameters>
+                            <parameter name="promote-file-version-request-data" type="promote-file-version-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/versions/current" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['promote-file-version-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="promote-file-version-response-type" />
+            </operation>
+    <operation name="delete-file-version" >
+                <parameters>
+                                        <parameter name="file-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="version-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="if-match"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The etag of the file. This is in the &#8216;etag&#8217; field of the file object."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/files/{FILE_ID}/versions/{VERSION_ID}" method="DELETE" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'If-Match': vars['if-match'] } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FILE_ID': vars['file-id'],'VERSION_ID': vars['version-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="create-folder" >
+                <parameters>
+                            <parameter name="create-folder-request-data" type="create-folder-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-folder-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-folder-response-type" />
+            </operation>
+    <operation name="get-folder" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-folder-response-type" />
+            </operation>
+    <operation name="update-folder" >
+                <parameters>
+                            <parameter name="update-folder-request-data" type="update-folder-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="if-match"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="This is in the &#8216;etag&#8217; field of the folder object."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-folder-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json','If-Match': vars['if-match'] } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-folder-response-type" />
+            </operation>
+    <operation name="delete-folder" >
+                <parameters>
+                                        <parameter name="recursive"
+                    type="boolean"
+                                        use="OPTIONAL"                    />
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="if-match"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="This is in the &#8216;etag&#8217; field of the folder object."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}" method="DELETE" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'If-Match': vars['if-match'] } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'recursive': vars['recursive'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+                    </body>
+            </operation>
+    <operation name="restore-trashed-folder" >
+                <parameters>
+                            <parameter name="restore-trashed-folder-request-data" type="restore-trashed-folder-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['restore-trashed-folder-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="restore-trashed-folder-response-type" />
+            </operation>
+    <operation name="get-folder-collaborations" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum number of items to return in a page. The default is 100 and the max is 1000."/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The item at which to begin the response"/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}/collaborations" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-folder-collaborations-response-type" />
+            </operation>
+    <operation name="copy-folder" >
+                <parameters>
+                            <parameter name="copy-folder-request-data" type="copy-folder-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}/copy" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['copy-folder-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="copy-folder-response-type" />
+            </operation>
+    <operation name="get-folder-items" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum number of items to return in a page. The default is 100 and the max is 1000."/>
+                            <parameter name="offset"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The offset at which to begin the response. An offset of value of 0 will start at the beginning of the folder-listing. Note: If there are hidden items in your previous response, your next offset should be = offset + limit, not the # of records you received back. The default is 0."/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}/items" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-folder-items-response-type" />
+            </operation>
+    <operation name="get-trashed-folder" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}/trash" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-trashed-folder-response-type" />
+            </operation>
+    <operation name="delete-trashed-folder" >
+                <parameters>
+                                        <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/{FOLDER_ID}/trash" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="get-trashed-items" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum number of items to return"/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The item at which to begin the response"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/folders/trash/items" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-trashed-items-response-type" />
+            </operation>
+    <operation name="create-group-membership" >
+                <parameters>
+                            <parameter name="create-group-membership-request-data" type="create-group-membership-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/group_memberships" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-group-membership-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-group-membership-response-type" />
+            </operation>
+    <operation name="get-group-membership" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="group-membership-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/group_memberships/{GROUP_MEMBERSHIP_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'GROUP_MEMBERSHIP_ID': vars['group-membership-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-group-membership-response-type" />
+            </operation>
+    <operation name="update-group-membership" >
+                <parameters>
+                            <parameter name="update-group-membership-request-data" type="update-group-membership-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="group-membership-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/group_memberships/{GROUP_MEMBERSHIP_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-group-membership-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'GROUP_MEMBERSHIP_ID': vars['group-membership-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-group-membership-response-type" />
+            </operation>
+    <operation name="delete-group-membership" >
+                <parameters>
+                                        <parameter name="group-membership-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/group_memberships/{GROUP_MEMBERSHIP_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'GROUP_MEMBERSHIP_ID': vars['group-membership-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="create-group" >
+                <parameters>
+                            <parameter name="create-group-request-data" type="create-group-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/groups" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-group-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-group-response-type" />
+            </operation>
+    <operation name="get-enterprise-groups" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum number of items to return in a page. The default is 100 and the max is 1000."/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The item at which to begin the response."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/groups" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-enterprise-groups-response-type" />
+            </operation>
+    <operation name="get-group" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="group-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/groups/{GROUP_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'GROUP_ID': vars['group-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-group-response-type" />
+            </operation>
+    <operation name="delete-group" >
+                <parameters>
+                                        <parameter name="group-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/groups/{GROUP_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'GROUP_ID': vars['group-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="get-group-memberships" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The maximum number of items to return in a page. The default is 100 and the max is 1000."/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The item at which to begin the response."/>
+                            <parameter name="group-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/groups/{GROUP_ID}/memberships" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'GROUP_ID': vars['group-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-group-memberships-response-type" />
+            </operation>
+    <operation name="search" >
+                <parameters>
+                                        <parameter name="query"
+                    type="string"
+                                        use="REQUIRED"                    doc:description="The string to search for; can be matched against item names, descriptions, text content of a file, and other fields of the different item types."/>
+                            <parameter name="scope"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The scope for which you want to limit your search to. Can be user_content for a search limited to only the current user or enterprise_content for the entire enterprise. To enable the enterprise_content scope for an administrator, please contact us."/>
+                            <parameter name="file-extensions"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Limit searches to specific file extensions like pdf,png,doc. Requires one or a set of comma delimited file extensions: file_extension_1,file_extension_2,...."/>
+                            <parameter name="created-at-range"
+                    type="date"
+                                        use="OPTIONAL"                    doc:description="The date for when the item was created. Specify the date range by using RFC3339 timestamp variables separated by a comma: from_date,to_date (e.g 2014-05-15T13:35:01-07:00,2014-05-17T13:35:01-07:00). Trailing from_date, and leading ,to_date commas are also accepted, where the current date and earliest known date will be designated respectively."/>
+                            <parameter name="updated-at-range"
+                    type="date"
+                                        use="OPTIONAL"                    doc:description="The date for when the item was last updated. Specify the date range by using RFC3339 variables separated by a comma: from_date,to_date(e.g 2014-05-15T13:35:01-07:00,2014-05-17T13:35:01-07:00). Trailing from_date, and leading ,to_date commas are also accepted, where the current date and earliest known date will be designated respectively."/>
+                            <parameter name="size-range"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="Filter by a file size range. Specify the file size range in bytes separated by a comma:lower_bound_size,upper_bound_size, where 1MB is equivalent to 1000000 bytes. Trailing lower_bound_size, and leading ,upper_bound_size commas are also accepted as parameters."/>
+                            <parameter name="owner-user-ids"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Search by item owners. Requires one or a set of comma delimited user_ids: user_id_1,user_id_2,..."/>
+                            <parameter name="ancestor-folder-ids"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Limit searches to specific parent folders. Requires one or a set of comma delimited folder_ids: folder_id_1,folder_id_2,.... Parent folder results will also include items within subfolders."/>
+                            <parameter name="content-types"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Limit searches to specific Box designated content types. Can be name, description, file_content, comments, or tags. Requires one or a set of comma delimited content_types: content_type_1,content_type_2,...."/>
+                            <parameter name="type"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The type you want to return in your search. Can be file, folder, or web_link."/>
+                            <parameter name="trash-content"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Allows you to search within the trash. Can be trashed_only or non_trashed_only. Searches without this parameter default to non_trashed_only."/>
+                            <parameter name="mdfilters"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Filters for a specific metadata template for files with metadata object associations. The filters are to be placed in a single JSON object. Please refer the MDFilters object in the definitions section of the swagger.json"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="Number of search results to return. The default is 30 and the max is 200."/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The search result at which to start the response. The default is 0."/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/search" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'query': vars['query'],'scope': vars['scope'],'file_extensions': vars['file-extensions'],'created_at_range': vars['created-at-range'],'updated_at_range': vars['updated-at-range'],'size_range': vars['size-range'],'owner_user_ids': vars['owner-user-ids'],'ancestor_folder_ids': vars['ancestor-folder-ids'],'content_types': vars['content-types'],'type': vars['type'],'trash_content': vars['trash-content'],'mdfilters': vars['mdfilters'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="search-response-type" />
+            </operation>
+    <operation name="create-task-assignment" >
+                <parameters>
+                            <parameter name="create-task-assignment-request-data" type="create-task-assignment-request-type" use="REQUIRED" role="PRIMARY" />
+                                </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/task_assignments" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-task-assignment-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                        </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-task-assignment-response-type" />
+            </operation>
+    <operation name="get-task-assignment" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="task-assignment-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/task_assignments/{TASK_ASSIGNMENT_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ASSIGNMENT_ID': vars['task-assignment-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-task-assignment-response-type" />
+            </operation>
+    <operation name="update-task-assignment" >
+                <parameters>
+                            <parameter name="update-task-assignment-request-data" type="update-task-assignment-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="task-assignment-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/task_assignments/{TASK_ASSIGNMENT_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-task-assignment-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ASSIGNMENT_ID': vars['task-assignment-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-task-assignment-response-type" />
+            </operation>
+    <operation name="delete-task-assignment" >
+                <parameters>
+                                        <parameter name="task-assignment-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/task_assignments/{TASK_ASSIGNMENT_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ASSIGNMENT_ID': vars['task-assignment-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="create-task" >
+                <parameters>
+                            <parameter name="create-task-request-data" type="create-task-request-type" use="REQUIRED" role="PRIMARY" />
+                                </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/tasks" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-task-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                        </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-task-response-type" />
+            </operation>
+    <operation name="get-task" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="task-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/tasks/{TASK_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ID': vars['task-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-task-response-type" />
+            </operation>
+    <operation name="update-task" >
+                <parameters>
+                            <parameter name="update-task-request-data" type="update-task-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="task-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/tasks/{TASK_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-task-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ID': vars['task-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-task-response-type" />
+            </operation>
+    <operation name="delete-task" >
+                <parameters>
+                                        <parameter name="task-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/tasks/{TASK_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ID': vars['task-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                    </http:request>
+                    </body>
+            </operation>
+    <operation name="get-task-assignments" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="task-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/tasks/{TASK_ID}/assignments" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'TASK_ID': vars['task-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-task-assignments-response-type" />
+            </operation>
+    <operation name="create-user" >
+                <parameters>
+                            <parameter name="create-user-request-data" type="create-user-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users" method="POST" >
+                                    <http:body>
+                        #[output application/json --- vars['create-user-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="create-user-response-type" />
+            </operation>
+    <operation name="get-enterprise-users" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="filter-term"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="A string used to filter the results to only users starting with the filter_term in either the name or the login."/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The number of records to return. The default is 100 and the max is 1000."/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The record at which to start. The default is 0."/>
+                            <parameter name="user-type"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="The type of user to search for. Valid values are all, external or managed.  If nothing is provided, the default behavior will be managed only"/>
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                                    <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'filter_term': vars['filter-term'],'limit': vars['limit'],'offset': vars['offset'],'user_type': vars['user-type'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-enterprise-users-response-type" />
+            </operation>
+    <operation name="get-user" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="user-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users/{USER_ID}" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'USER_ID': vars['user-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-user-response-type" />
+            </operation>
+    <operation name="update-user" >
+                <parameters>
+                            <parameter name="update-user-request-data" type="update-user-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="user-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users/{USER_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-user-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'USER_ID': vars['user-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-user-response-type" />
+            </operation>
+    <operation name="delete-user" >
+                <parameters>
+                                        <parameter name="notify"
+                    type="boolean"
+                                        use="OPTIONAL"                    />
+                            <parameter name="force"
+                    type="boolean"
+                                        use="OPTIONAL"                    />
+                            <parameter name="user-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users/{USER_ID}" method="DELETE" >
+                
+                                                                                <http:uri-params>
+                            <![CDATA[#[ { 'USER_ID': vars['user-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'notify': vars['notify'],'force': vars['force'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+                    </body>
+            </operation>
+    <operation name="get-user-group-membership" >
+                <parameters>
+                                        <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="limit"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="Default is 100. Max is 1000"/>
+                            <parameter name="offset"
+                    type="number"
+                                        use="OPTIONAL"                    doc:description="The item at which to begin the response"/>
+                            <parameter name="user-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users/{USER_ID}/memberships" method="GET" >
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'USER_ID': vars['user-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'fields': vars['fields'],'limit': vars['limit'],'offset': vars['offset'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="get-user-group-membership-response-type" />
+            </operation>
+    <operation name="update-user-folder" >
+                <parameters>
+                            <parameter name="update-user-folder-request-data" type="update-user-folder-request-type" use="REQUIRED" role="PRIMARY" />
+                                        <parameter name="notify"
+                    type="boolean"
+                                        use="OPTIONAL"                    />
+                            <parameter name="fields"
+                    type="string"
+                                        use="OPTIONAL"                    doc:description="Attribute(s) to include in the response"/>
+                            <parameter name="user-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                            <parameter name="folder-id"
+                    type="string"
+                                        use="REQUIRED"                    />
+                    </parameters>
+                <body>
+            <http:request config-ref="mule-box-connector-httpreq-config" path="/users/{USER_ID}/folders/{FOLDER_ID}" method="PUT" >
+                                    <http:body>
+                        #[output application/json --- vars['update-user-folder-request-data']]
+                    </http:body>
+                
+                                                            <http:headers>
+                            <![CDATA[#[ { 'Accept': 'application/json' } filterObject $ != null ]]]>
+                        </http:headers>
+                                                                <http:uri-params>
+                            <![CDATA[#[ { 'USER_ID': vars['user-id'],'FOLDER_ID': vars['folder-id'] } filterObject $ != null ]]]>
+                        </http:uri-params>
+                                                                <http:query-params>
+                            <![CDATA[#[ { 'notify': vars['notify'],'fields': vars['fields'] } filterObject $ != null ]]]>
+                        </http:query-params>
+                                                </http:request>
+            <mule:set-payload value="#[payload]" mimeType="application/json" />        </body>
+                    <output type="update-user-folder-response-type" />
+            </operation>
+
+</module>
