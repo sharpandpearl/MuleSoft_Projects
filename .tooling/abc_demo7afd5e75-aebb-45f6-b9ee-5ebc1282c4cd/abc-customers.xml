@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+    <http:listener-config name="abc-customers-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="abc-customers-config" api="abc-customers.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:listener-config name="HTTP_Customers_CloudHub_Listener_config" doc:name="HTTP Listener config" doc:id="be77f97e-c835-498d-9fe6-ee86c808922c" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<flow name="abc-customers-main">
+        <http:listener config-ref="abc-customers-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="abc-customers-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="abc-customers-console">
+        <http:listener config-ref="abc-customers-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="abc-customers-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\abc\getAllCustomerDetails:abc-customers-config">
+        <logger level="INFO" message="get:\abc\getAllCustomerDetails:abc-customers-config" />
+		<db:select doc:name="Select" doc:id="f26551e3-ea8d-4918-a6f9-62dd89edc9f5" config-ref="GCP_ABC_DB_Config">
+			<db:sql ><![CDATA[Select * from abc.abc_customers;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="fc639a30-3881-4e4d-8096-24b9cae1cb27" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	CustomerEmail: payload01.customer_email default "",
+	ID: payload01.customer_id,
+	CustomerName: payload01.customer_name default "",
+	CustomerAddress: {
+		Street2: payload01.customer_address2,
+		Street1: payload01.customer_address1,
+		StateOrProvince: payload01.customer_stateOrProvince,
+		PostalCode: payload01.customer_postalCode,
+		Country: payload01.customer_country,
+		City: payload01.customer_city
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\abc\getSingleCustomer\(CustomerID):abc-customers-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="CustomerID">attributes.uriParams.'CustomerID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <db:select doc:name="Select" doc:id="7839a17f-cc3b-45e8-8201-c5bad58882cd" config-ref="GCP_ABC_DB_Config">
+			<db:sql ><![CDATA[Select * from abc.abc_customers
+where abc.abc_customers.customer_id = :CID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/java
+---
+{
+	CID: attributes.uriParams.'CustomerID'
+}]]]></db:input-parameters>
+		</db:select>
+		<logger level="INFO" message="get:\abc\getSingleCustomer\(CustomerID):abc-customers-config" />
+		<ee:transform doc:name="Transform Message" doc:id="281a40c7-6dfe-4246-a9b9-0ba0b2f6a74b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	CustomerEmail: payload.customer_email as Number default 0,
+	ID: payload.customer_id,
+	CustomerName: payload.customer_name default "",
+	CustomerAddress: {
+		Street2: payload.customer_address2,
+		Street1: payload.customer_address1,
+		StateOrProvince: payload.customer_stateOrProvince,
+		PostalCode: payload.customer_postalCode,
+		Country: payload.customer_country,
+		City: payload.customer_city
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="post:\abc\createCustomer:application\json:abc-customers-config">
+		<db:bulk-insert doc:name="Bulk insert" doc:id="a3672005-e863-41ee-8477-c3d99c5f1b74" config-ref="GCP_ABC_DB_Config">
+			<db:bulk-input-parameters ><![CDATA[#[output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ZIP: payload01.CustomerAddress.PostalCode,
+	CITY: payload01.CustomerAddress.City,
+	COUNTRY: payload01.CustomerAddress.Country,
+	STATE: payload01.CustomerAddress.StateOrProvince,
+	EMAIL: payload01.CustomerEmail,
+	STREET1: payload01.CustomerAddress.Street1,
+	NAME: payload01.CustomerName,
+	STREET2: payload01.CustomerAddress.Street2
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[INSERT INTO abc.abc_customers (customer_name, customer_email, customer_address1, customer_address2, customer_city, customer_stateOrProvince, customer_postalCode,customer_country)
+VALUES (:NAME, :EMAIL, :STREET1, :STREET2, :CITY, :STATE, :ZIP, :COUNTRY);]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Customer records successfully updated"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

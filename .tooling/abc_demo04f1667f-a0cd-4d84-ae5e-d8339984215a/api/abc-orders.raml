@@ -1,0 +1,66 @@
+#%RAML 1.0
+title: ABC API
+
+
+
+types:
+  OrderState:
+    type: object
+    properties:
+      OrderID: integer
+      OrderStatus: string
+
+  UpdatedOrderState:
+    type: object
+    properties:
+      OrderID: integer
+      UpdatedStatus: string
+  
+  OrderID:
+    type: integer
+
+  Order: !include /Custom_DataTypes/ABC_Order_DataType.raml
+  OrderNoID: !include /Custom_DataTypes/ABC_Order_NoID_DataType.raml
+  OrderDetails: !include /Custom_DataTypes/ABC_OrderDetails_DataType.raml
+
+
+/abc/Createorder:
+  post:
+    body:
+      application/json:
+        type: OrderNoID[]
+
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Order records successfully updated
+    
+/abc/GetOrder/{ID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: Order
+            
+/abc/GetAllOrderDetails:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: OrderDetails[]
+
+/abc/UpdateOrderStatus:
+  post:
+    body:
+      application/json:
+        type: UpdatedOrderState
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Order Status Successfully Updated

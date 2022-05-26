@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="12046949-5919-4740-aa83-b5c1d64ca86e" >
-		<db:my-sql-connection host="nephron-data.cjibhcnvimcz.us-east-1.rds.amazonaws.com" port="3306" user="kaw410" password="kyrrais6" database="nephron_data" />
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="kyrrais6" database="nephron_data" />
 	</db:config>
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="aa5434f9-5db3-4671-9304-578e279a2d3a" >
 		<http:listener-connection host="0.0.0.0" port="${http.port}" />

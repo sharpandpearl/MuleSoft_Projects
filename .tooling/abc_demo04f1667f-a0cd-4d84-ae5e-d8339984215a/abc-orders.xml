@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+    <http:listener-config name="abc-orders-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8082" />
+    </http:listener-config>
+    <apikit:config name="abc-orders-config" api="abc-orders.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <db:config name="GCP_ABC_DB_Config" doc:name="Database Config" doc:id="0c38b9c4-ac33-4b10-b132-2b6b9876b871" >
+		<db:my-sql-connection host="35.184.104.136" port="3306" user="root" password="kyrrais6" database="abc" />
+	</db:config>
+	<flow name="abc-orders-main">
+        <http:listener config-ref="abc-orders-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="abc-orders-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="abc-orders-console">
+        <http:listener config-ref="abc-orders-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="abc-orders-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\abc\GetAllOrderDetails:abc-orders-config">
+        <logger level="INFO" message="get:\abc\GetAllOrderDetails:abc-orders-config" />
+		<db:select doc:name="Select" doc:id="b086c525-bc5d-4dcb-ae6b-8a90b844542d" config-ref="GCP_ABC_DB_Config">
+			<db:sql ><![CDATA[Select * from abc.abc_full_order_details;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="54191b0a-0d26-4020-bafd-9a43dc8997c3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	OrderDateTime: payload01.order_dateTime as String default "",
+	ProductSize: payload01.product_size default "",
+	ProductName: payload01.product_name default "",
+	CustomerEmail: payload01.customer_email default "",
+	ProductID: payload01.product_id default 0,
+	ProductPrice: payload01.product_price default 0,
+	CustomerID: payload01.customer_id default 0,
+	ProductDescription: payload01.product_description default "",
+	Count: payload01.count default 0,
+	CustomerName: payload01.customer_name default "",
+	OrderID: payload01.order_id,
+	CustomerAddress: {
+		Street2: payload01.customer_address2,
+		Street1: payload01.customer_address1,
+		StateOrProvince: payload01.customer_stateOrProvince,
+		PostalCode: payload01.customer_postalCode,
+		Country: payload01.customer_country,
+		City: payload01.customer_city
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\abc\GetOrder\(ID):abc-orders-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <db:select doc:name="Select" doc:id="c14c86c5-de42-4125-91a2-0dc467cf53c0" config-ref="GCP_ABC_DB_Config">
+			<db:sql ><![CDATA[Select * from abc.abc_orders
+where abc.abc_orders.order_id = :OID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{'OID' : attributes.uriParams.'ID'}]]]></db:input-parameters>
+		</db:select>
+		<logger level="INFO" message="get:\abc\GetOrder\(ID):abc-orders-config" />
+		<ee:transform doc:name="Transform Message" doc:id="b1475bd2-ef9a-4085-a71b-02e7592405f1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	OrderStatus: payload.order_status default "",
+	Product: payload.product_id default 0,
+	CustomerID: payload.customer_id default 0,
+	OrderID: payload.order_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="post:\abc\Createorder:application\json:abc-orders-config">
+        <logger level="INFO" message="post:\abc\Createorder:application\json:abc-orders-config" />
+		<db:bulk-insert doc:name="Bulk insert" doc:id="ac5ede8f-502f-40fa-a1d4-42c6493659bf" config-ref="GCP_ABC_DB_Config">
+			<db:bulk-input-parameters ><![CDATA[#[output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	STATUS: payload01.OrderStatus,
+	PID: payload01.Product as String,
+	CID: payload01.CustomerID as String
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[INSERT INTO abc.abc_orders (customer_id, product_id,order_status)
+VALUES (:CID, :PID,:STATUS);]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform doc:name="Transform Message" doc:id="77f81ef7-5579-420a-a4c5-d3c291245552" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Order records successfully updated"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="post:\abc\UpdateOrderStatus:application\json:abc-orders-config">
+        <db:update doc:name="Update" doc:id="59167199-26da-44a2-8866-16d99a9b5603" config-ref="GCP_ABC_DB_Config">
+			<db:sql><![CDATA[UPDATE abc.abc_orders
+SET abc.abc_orders.order_status = :newStatus
+WHERE abc.abc_orders.order_id = :OID]]></db:sql>
+			<db:input-parameters><![CDATA[#[output application/java
+---
+{
+	newStatus: payload.UpdatedStatus,
+	OID: payload.OrderID as String
+}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Order Status Successfully Updated"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

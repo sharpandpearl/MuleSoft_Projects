@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:request-connection host="api.reporter.nih.gov" port="${https.port}" protocol="HTTPS"/>
 	</http:request-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="22a97851-6348-4d6d-a315-7d648b27b822" >
-		<db:my-sql-connection host="nephron-data.cjibhcnvimcz.us-east-1.rds.amazonaws.com" port="3306" user="kaw410" password="kyrrais6" database="nephron_data" />
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="kyrrais6" database="nephron_data" />
 	</db:config>
 	<flow name="NIH_SchedulerFlow" doc:id="981bdd07-eb15-48b1-8368-04ae3a9f5e5f" >
 		<scheduler doc:name="Scheduler" doc:id="d75379a6-de91-4fb0-a030-776ec2b1c4f3" >

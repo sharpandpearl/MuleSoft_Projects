@@ -1,0 +1,41 @@
+#%RAML 1.0
+title: abc-customers
+
+types:
+  CustomerID:
+    type: integer
+  Customer: !include /Custom_DataTypes/ABC_Customer_DataType.raml
+  CustomerNoID: !include /Custom_DataTypes/ABC_Customer_NoID_DataType.raml
+
+
+  
+/abc/createCustomer:
+    post:
+      body:
+        application/json:
+          type: CustomerNoID[]
+      responses:
+        201:
+          body:
+            application/json:
+              example:
+                message: Customer records successfully updated
+      
+
+/abc/getAllCustomerDetails:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: Customer[]
+
+/abc/getSingleCustomer/{CustomerID}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: Customer
+
+

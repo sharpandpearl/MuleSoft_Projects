@@ -1,0 +1,46 @@
+{
+  "configs": [
+    "abc-orders.xml",
+    "abc-customers.xml",
+    "abc-products.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:abc_demo:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.4.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "abc-customers.xml",
+        "abc-orders.xml",
+        "abc-products.xml",
+        "api/abc-customers.raml",
+        "api/abc-orders.raml",
+        "api/abc-products.raml",
+        "api/abc_ramls.zip",
+        "api/Custom_DataTypes/ABC_Customer_DataType.raml",
+        "api/Custom_DataTypes/ABC_Customer_NoID_DataType.raml",
+        "api/Custom_DataTypes/ABC_OrderDetails_DataType.raml",
+        "api/Custom_DataTypes/ABC_Order_DataType.raml",
+        "api/Custom_DataTypes/ABC_Order_NoID_DataType.raml",
+        "api/Custom_DataTypes/ABC_Product_DataType.raml",
+        "api/Custom_DataTypes/ABC_Product_NoID_DataType.raml",
+        "api/Custom_Examples/ABC_Customer_Example.raml",
+        "api/Custom_Examples/ABC_Customer_NoID_Example.raml",
+        "api/Custom_Examples/ABC_OrderDetails_Example.raml",
+        "api/Custom_Examples/ABC_Order_Example.raml",
+        "api/Custom_Examples/ABC_Order_NoID_Example.raml",
+        "api/Custom_Examples/ABC_Product_Example.raml",
+        "api/Custom_Examples/ABC_Product_NoID_Example.raml",
+        "log4j2.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

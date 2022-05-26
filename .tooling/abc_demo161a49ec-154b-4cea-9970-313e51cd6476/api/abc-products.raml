@@ -1,0 +1,38 @@
+#%RAML 1.0
+title: abc-products
+
+types:
+  ProductID:
+    type: integer
+  Product: !include /Custom_DataTypes/ABC_Product_DataType.raml
+  ProductNoID: !include /Custom_DataTypes/ABC_Product_NoID_DataType.raml
+
+/abc/CreateProducts:
+  post:
+    body:
+      application/json:
+        type: ProductNoID[]
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: products successfully created
+
+/abc/GetProduct/{ID}:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Product
+            
+/abc/GetInventory:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Product[]
+
+

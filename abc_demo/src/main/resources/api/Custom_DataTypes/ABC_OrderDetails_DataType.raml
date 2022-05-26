@@ -1,0 +1,29 @@
+#%RAML 1.0 DataType
+
+type: object
+properties: 
+  OrderID?: integer
+  CustomerID: integer
+  ProductID: integer
+  OrderDateTime: string
+  ProductName: string
+  ProductDescription: string
+  ProductPrice:
+    type: number
+    minimum: 0.0
+    format: float
+    multipleOf: 0.01
+  Count: integer
+  ProductSize: string
+  CustomerName: string
+  CustomerEmail: string
+  CustomerAddress:
+    type: object
+    required: false
+    properties:
+      Street1: string
+      Street2?: string
+      City: string
+      StateOrProvince: string
+      PostalCode: string
+      Country: string
